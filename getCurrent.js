@@ -1,42 +1,17 @@
-import { baseTimeCurrent } from "./baseDateTime.js"
 import { updateData } from "./util/replaceOne_mysql.js"
+import getApiData from "./getApiData.js"
 import './env.js'
-//api info
-const apiurl = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst'
-const numOfRows = '1000'
-const pageNo = '1'
-const dataType = 'JSON'
+
 const 방학동 = {nx:61, ny:129}
-const 상봉동 = {nx:62, ny:127}
 const categoryKey = {T1H:'tempc',RN1:'rainmm',UUU:'windh',VVV:'windv',REH:'humidity',PTY:'raintype',VEC:'winddeg',WSD:'windspeed'}
 
 /**
- * Current Weather API 에서 자료 가져오기
- * @param {object} param0 { nx:int, ny:int } 좌표값
- * @returns resonse.body
- */
-async function getCurrentRaw({nx,ny}){
-    const {base_date,base_time}=baseTimeCurrent()
-    const apiKey=process.env.APIKEY
-    const url = `${apiurl}?serviceKey=${apiKey}&numOfRows=${numOfRows}&pageNo=${pageNo}&dataType=${dataType}&base_date=${base_date}&base_time=${base_time}&nx=${nx}&ny=${ny}`
-    try{
-        const result = await (await fetch(url)).json()
-        const resCode = result.response.header.resultCode
-        const resMsg = result.response.header.resultMsg
-        const res = resCode == '00'? result.response.body.items.item : false
-        if (res) return res
-        throw new Error(`Response Err : ${resMsg}`)
-    }catch(err){
-        console.log(`API FETCH ERR. ${err}`)
-    }
-}
-/**
- * reponse 에서 받은 raw 데이터를 보기 쉬운 객체로 가공
+ * api 의 raw object 를 간단한 형식으로 가공
  * @param {object} data 
  * @returns object
  */
 function getCurrentData(data){
-    if (!data){return 'Fetch Data for Current API Failed.'}
+    if (!data){return false}
     const result = {baseTime:data[0].baseTime,items:{}}
     data.forEach(element => {
         const {category, obsrValue} = element;
@@ -44,8 +19,12 @@ function getCurrentData(data){
     });
     return result
 }
+/**
+ * get...Data 에서 가공된 object 를 db 에 저장
+ * @returns 
+ */
 async function main(){
-    const data = getCurrentData(await getCurrentRaw(방학동))
+    const data = getCurrentData(await getApiData(방학동,'current'))
     return await updateData(data,'current')
 }
 await main();
