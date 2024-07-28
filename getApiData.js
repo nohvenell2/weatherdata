@@ -32,7 +32,3 @@ export default async function getApiData({nx,ny},type){
         console.log(`API fetch Error : ${err}`)
     }
 }
-/*
-const 방학동 = {nx:61, ny:129}
-console.log(await getApiData(방학동,'current'))
-*/

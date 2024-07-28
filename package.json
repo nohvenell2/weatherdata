@@ -2,7 +2,6 @@
   "dependencies": {
     "@js-temporal/polyfill": "^0.4.4",
     "dotenv": "^16.4.5",
-    "mongodb": "^6.8.0",
     "mysql2": "^3.11.0"
   },
   "type": "module"
