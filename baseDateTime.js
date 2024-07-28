@@ -22,7 +22,7 @@ function temporalTimeInfo(now = Temporal.Now.plainDateTimeISO()){
  */
 function baseTimeCurrent(now = Temporal.Now.plainDateTimeISO(), delay = 10){
     //10분 딜레이기 때문에 현재 분에서 -10분 으로 시간 조정
-    now = now.with({minute:now.minute-delay})
+    var now = now.subtract({minutes:10})
     var {year,month,day,hour} = temporalTimeInfo(now)
     return {base_time:hour+'00',base_date:year+month+day}
 }
@@ -35,7 +35,7 @@ function baseTimeCurrent(now = Temporal.Now.plainDateTimeISO(), delay = 10){
  */
 function baseTimeShort(now = Temporal.Now.plainDateTimeISO(), delay = 10){
     //10분 딜레이기 때문에 현재 분에서 -10분 으로 시간 조정
-    now = now.with({minute:now.minute-delay})
+    var now = now.subtract({minutes:10})
     //매 시 30분 이전이면 기준 시간을 1시간 전으로. 
     if (now.minute <= 30){ var now = now.subtract({hours:1}); }
     var {year,month,day,hour} = temporalTimeInfo(now)
@@ -50,7 +50,7 @@ function baseTimeShort(now = Temporal.Now.plainDateTimeISO(), delay = 10){
  */
 function baseTimeMid(now = Temporal.Now.plainDateTimeISO(), delay = 10){
     //10분 딜레이기 때문에 현재 분에서 -10분 으로 시간 조정
-    now = now.with({minute:now.minute-delay})
+    var now = now.subtract({minutes:10})
     //2시 전 => 전날 23시
     if (now.hour == 0 || now.hour == 1){
         now = now.with({day: now.day-1, hour:23})
