@@ -1,8 +1,17 @@
+/**
+ * 1. 정보를 api 로부터 JSON 형식으로 요청
+ * 2. 요청 받은 데이터를 간단한 object 로 변환
+ * 3. object 를 db 에 전달
+ * !! 단기예보 정보는 2 5 8 11 14 17 20 23 시에 발표하고 발표 10분 후 api 에 업로드
+ * !! 매 시 10분에 실행
+ */
+
 import './env.js'
 import { updateData } from "./util/replaceOne_mysql.js"
 import getApiData from "./getApiData.js"
 
 const 방학동 = {nx:61, ny:129}
+const 상봉동 = {nx:62, ny:127}
 const categoryKey = {POP:'rainper',SNO:'snowmm',TMP:'tempc',PCP:'rainmm',SKY:'sky',UUU:'windh',VVV:'windv',REH:'humidity',
     PTY:'raintype',VEC:'winddeg',WSD:'windspeed',TMN:'tempmin',TMX:'tempmax',WAV:'wave'}
 
@@ -29,7 +38,10 @@ function getMidData(data){
     });
     return result
 }
-
+/**
+ * get...Data 에서 가공된 object 를 db 에 저장
+ * @returns 
+ */
 async function main(){
     const data = getMidData(await getApiData(방학동,'mid'))
     return await updateData(data,'mid')

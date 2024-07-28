@@ -1,3 +1,11 @@
+/**
+ * 1. 정보를 api 로부터 JSON 형식으로 요청
+ * 2. 요청 받은 데이터를 간단한 object 로 변환
+ * 3. object 를 db 에 전달
+ * !! 초단기실황 정보는 매 시 30분에 발표하고 40분에 api 에 업로드
+ * !! 매 시 40분에 실행
+ * 
+ */
 import { updateData } from "./util/replaceOne_mysql.js"
 import getApiData from "./getApiData.js"
 import './env.js'

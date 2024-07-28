@@ -15,6 +15,7 @@ async function updateData(data,tableName){
         const [result] = await connection.query(
             `UPDATE weather.weather_BangHak3Dong SET ${tableName} = ? Where id = ?`,[dataJSON,1]
         )
+        console.log(`${tableName} data uplodaded.`)
         return result
     }catch(err){
         console.log(`Error at updateCurrent - mysql Uploading. ${err}`)
