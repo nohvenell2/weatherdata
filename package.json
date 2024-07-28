@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.4.4",
+    "dotenv": "^16.4.5"
+  }
+}
