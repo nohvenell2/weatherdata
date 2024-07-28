@@ -1,8 +1,6 @@
 import { baseTimeShort } from "./baseDateTime.js"
 import './env.js'
-import replaceOne from './util/replaceOne.js'
-
-
+import { updateData } from "./util/replaceOne_mysql.js"
 
 const apiurl = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst'
 const numOfRows = '1000'
@@ -52,7 +50,6 @@ function getShortData(data){
 }
 async function main(){
     const data = getShortData(await getShortRaw(방학동))
-    //console.log(data)
-    await replaceOne(data,'short')
+    return await updateData(data,'short')
 }
-main()
+await main();

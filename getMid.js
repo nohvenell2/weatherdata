@@ -1,6 +1,6 @@
 import { baseTimeMid } from "./baseDateTime.js"
 import './env.js'
-import replaceOne from './util/replaceOne.js'
+import { updateData } from "./util/replaceOne_mysql.js"
 
 const apiurl = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'
 const numOfRows = '2000'
@@ -57,7 +57,7 @@ function getMidData(data){
 }
 
 async function main(){
-    const result = getMidData(await getMidRaw(방학동));
-    replaceOne(result,'mid')
+    const data = getMidData(await getMidRaw(방학동))
+    return await updateData(data,'mid')
 }
-main()
+await main();

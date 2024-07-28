@@ -1,6 +1,6 @@
 import { baseTimeCurrent } from "./baseDateTime.js"
+import { updateData } from "./util/replaceOne_mysql.js"
 import './env.js'
-import replaceOne from './util/replaceOne.js'
 //api info
 const apiurl = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst'
 const numOfRows = '1000'
@@ -46,6 +46,6 @@ function getCurrentData(data){
 }
 async function main(){
     const data = getCurrentData(await getCurrentRaw(방학동))
-    await replaceOne(data,'current')
+    return await updateData(data,'current')
 }
-main()
+await main();
