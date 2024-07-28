@@ -1,6 +1,7 @@
 import { baseTimeCurrent } from "./baseDateTime.js"
 import './env.js'
 import replaceOne from './util/replaceOne.js'
+//api info
 const apiurl = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst'
 const numOfRows = '1000'
 const pageNo = '1'
@@ -23,7 +24,8 @@ async function getCurrentRaw({nx,ny}){
         const resCode = result.response.header.resultCode
         const resMsg = result.response.header.resultMsg
         const res = resCode == '00'? result.response.body.items.item : false
-        return res? res: console.log(resMsg)
+        if (res) return res
+        throw new Error(`Response Err : ${resMsg}`)
     }catch(err){
         console.log(`API FETCH ERR. ${err}`)
     }
@@ -34,13 +36,16 @@ async function getCurrentRaw({nx,ny}){
  * @returns object
  */
 function getCurrentData(data){
-    if (!data){return 'Fetch Data for API Failed.'}
-    const result = {baseTime:data[0].baseTime}
+    if (!data){return 'Fetch Data for Current API Failed.'}
+    const result = {baseTime:data[0].baseTime,items:{}}
     data.forEach(element => {
         const {category, obsrValue} = element;
-        result[categoryKey[category]] = obsrValue;
+        if (category in categoryKey){result.items[categoryKey[category]] = obsrValue;}
     });
     return result
 }
-const data = getCurrentData(await getCurrentRaw(방학동))
-replaceOne(data)
+async function main(){
+    const data = getCurrentData(await getCurrentRaw(방학동))
+    await replaceOne(data,'current')
+}
+main()
