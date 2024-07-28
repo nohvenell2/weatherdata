@@ -1,15 +1,16 @@
 import { baseTimeCurrent } from "./baseDateTime.js"
+import './env.js'
 
 const apiCurrent = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst'
-const apiKey = 'Wuu1S4zjENzkyNEbIBQ5SFQAxLB53WJbPOIHXWIeHO4nktvrzROU3lsg%2FRzPM5tf%2FybaZdFtbaB7F4IZqVTRDA%3D%3D'
 const numOfRows = '1000'
 const pageNo = '1'
 const dataType = 'JSON'
-const nx='61'
-const ny='129'
+const 방학동 = {nx:61, ny:129}
+const 상봉동 = {nx:62, ny:127}
 
-async function testCurrent(){
+async function testCurrent({nx,ny}){
     const {base_date,base_time}=baseTimeCurrent()
+    const apiKey=process.env.APIKEY
     const url = `${apiCurrent}?serviceKey=${apiKey}&numOfRows=${numOfRows}&pageNo=${pageNo}&dataType=${dataType}&base_date=${base_date}&base_time=${base_time}&nx=${nx}&ny=${ny}`
     try{
         const result = await (await fetch(url)).json()
@@ -21,4 +22,4 @@ async function testCurrent(){
         console.log(`API FETCH ERR. ${err}`)
     }
 }
-testCurrent();
+testCurrent(방학동);
