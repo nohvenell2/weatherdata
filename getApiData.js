@@ -24,7 +24,7 @@ export default async function getApiData({nx,ny},type){
         const resMsg = result.response.header.resultMsg
         const res = resCode == '00'? result.response.body.items.item : false
         if (res) {
-            console.log(`${type} data fetched.`)
+            console.log(`${type} data fetched`)
             return res
         }
         throw new Error(`API Response Error : ${resMsg}`)

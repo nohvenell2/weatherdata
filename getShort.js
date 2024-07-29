@@ -9,6 +9,7 @@
 import './env.js'
 import getApiData from "./getApiData.js"
 import { updateData } from "./util/replaceOne_mysql.js"
+import updateOne from './util/updateOne_mysql.js'
 
 const 방학동 = {nx:61, ny:129}
 const 상봉동 = {nx:62, ny:127}
@@ -37,6 +38,6 @@ function getShortData(data){
  */
 async function main(){
     const data = getShortData(await getApiData(방학동,'short'))
-    return await updateData(data,'short')
+    return await updateOne(data,'short','방학3동')
 }
 await main();

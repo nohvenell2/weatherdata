@@ -7,9 +7,8 @@
  */
 
 import './env.js'
-import { updateData } from "./util/replaceOne_mysql.js"
 import getApiData from "./getApiData.js"
-
+import updateOne from './util/updateOne_mysql.js'
 const 방학동 = {nx:61, ny:129}
 const 상봉동 = {nx:62, ny:127}
 const categoryKey = {POP:'rainper',SNO:'snowmm',TMP:'tempc',PCP:'rainmm',SKY:'sky',UUU:'windh',VVV:'windv',REH:'humidity',
@@ -44,6 +43,6 @@ function getMidData(data){
  */
 async function main(){
     const data = getMidData(await getApiData(방학동,'mid'))
-    return await updateData(data,'mid')
+    return await updateOne(data,'mid','방학3동')
 }
 await main();
