@@ -9,6 +9,7 @@
 import getApiData from "./getApiData.js"
 import updateOne from './util/updateOne_mysql.js'
 import { coordinates } from "./coordinates.js"
+import loggingmain from "./util/loggingmain.js"
 
 const categoryKey = {POP:'rainper',SNO:'snowmm',TMP:'tempc',PCP:'rainmm',SKY:'sky',UUU:'windh',VVV:'windv',REH:'humidity',
     PTY:'raintype',VEC:'winddeg',WSD:'windspeed',TMN:'tempmin',TMX:'tempmax',WAV:'wave'}
@@ -47,6 +48,7 @@ async function main(lo='방학3동'){
     }
     const data = getMidData(await getApiData(coordinates[lo],'mid'))
     //console.log(data.items)
-    return await updateOne(data,'mid',lo)
+    const result = await updateOne(data,'mid',lo)
+    return `${(new Date).toLocaleString()} - [getMid.js] Done.`
 }
-await main('방학3동');
+loggingmain('getMid.js',main,'방학3동');

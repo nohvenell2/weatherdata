@@ -9,6 +9,7 @@
 
 import './env.js'
 import connectDB from './util/connectDB_mysql.js'
+import loggingmain from './util/loggingmain.js'
 //api info
 const apiurl = 	'http://apis.data.go.kr/B552584/ArpltnStatsSvc/getCtprvnMesureSidoLIst' // 시도 실시간 1시간 평균
 const serviceKey = process.env.APIKEY
@@ -26,7 +27,7 @@ async function getApiData(url){
         const resMsg = result.response.header.resultMsg
         const res = resCode == '00'? result.response.body.items : false
         if (res) {
-            console.log(`Air Condition Data fetched.`)
+            console.log('Fetch air condition data')
             return res
         }
         throw new Error(`API Response Error : ${resMsg}`)
@@ -70,7 +71,7 @@ async function updateAirCondition(data){
             ];
         const [results] = await connection.query(query, values);
         }
-        console.log('Air Condition Data Uploaded.');
+        console.log('Upload air condition data');
     } catch (err) {
         console.error('데이터 삽입 오류:', err.stack);
     } finally {
@@ -79,8 +80,10 @@ async function updateAirCondition(data){
 };
 //실행 함수
 async function main(){
-    return await updateAirCondition(await getApiData(url))
+    const result = await updateAirCondition(await getApiData(url))
+    return `${(new Date).toLocaleString()} [getDust.js] Done.`
 }
 //실행
-main()
+loggingmain('getDust.js',main)
+
         
