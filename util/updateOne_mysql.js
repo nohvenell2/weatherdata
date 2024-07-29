@@ -22,7 +22,7 @@ export default async function updateOne(data,col,cityName){
         connection = await connectDB();
         const values = [cityName,JSON.stringify(data)]
         const [results] = await connection.query(query,values)
-        console.log(`Upload ${col} data`)
+        //console.log(`Upload ${col} data`)
         return results
     }catch(err){
         console.log(`Update Forecast Error : ${err}`)
