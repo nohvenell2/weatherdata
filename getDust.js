@@ -8,7 +8,6 @@
  */
 
 import './env.js'
-import mysql from 'mysql2/promise'
 import connectDB from './util/connectDB_mysql.js'
 //api info
 const apiurl = 	'http://apis.data.go.kr/B552584/ArpltnStatsSvc/getCtprvnMesureSidoLIst' // 시도 실시간 1시간 평균
@@ -52,13 +51,22 @@ async function updateAirCondition(data){
         pm10Value = VALUES(pm10Value),
         pm25Value = VALUES(pm25Value),
         so2Value = VALUES(so2Value);`;
+    const ifNone = (a) => {return a === ''? null : a}
     const connection = await connectDB();
     try {
         for (const record of data) {
             const values = [
-                record.cityName, record.cityNameEng, record.coValue, record.dataTime, record.districtCode,
-                record.districtNumSeq, record.khaiValue, record.no2Value, record.o3Value, record.pm10Value,
-                record.pm25Value, record.so2Value
+                record.cityName, record.cityNameEng,
+                ifNone(record.coValue),
+                ifNone(record.dataTime),
+                ifNone(record.districtCode),
+                ifNone(record.districtNumSeq),
+                ifNone(record.khaiValue),
+                ifNone(record.no2Value),
+                ifNone(record.o3Value),
+                ifNone(record.pm10Value),
+                ifNone(record.pm25Value),
+                ifNone(record.so2Value)
             ];
         const [results] = await connection.query(query, values);
         }

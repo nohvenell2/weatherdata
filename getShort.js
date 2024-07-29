@@ -6,13 +6,10 @@
  * !! 매 시 40분에 실행
  * 
  */
-import './env.js'
 import getApiData from "./getApiData.js"
-import { updateData } from "./util/replaceOne_mysql.js"
 import updateOne from './util/updateOne_mysql.js'
+import { coordinates } from "./coordinates.js"
 
-const 방학동 = {nx:61, ny:129}
-const 상봉동 = {nx:62, ny:127}
 const categoryKey = {T1H:'tempc',RN1:'rainmm',SKY:'sky',UUU:'windh',VVV:'windv',REH:'humidity',
     PTY:'raintype',LGT:'thunder',VEC:'winddeg',WSD:'windspeed'}
 /**
@@ -36,8 +33,13 @@ function getShortData(data){
  * get...Data 에서 가공된 object 를 db 에 저장
  * @returns 
  */
-async function main(){
-    const data = getShortData(await getApiData(방학동,'short'))
-    return await updateOne(data,'short','방학3동')
+async function main(lo='방학3동'){
+    if(!lo in coordinates){
+        console.log('Wrong City Name')
+        return
+    }
+    const data = getShortData(await getApiData(coordinates[lo],'short'))
+    //console.log(data.items)
+    return await updateOne(data,'short',lo)
 }
-await main();
+await main('방학3동');

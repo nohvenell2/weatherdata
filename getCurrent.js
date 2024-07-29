@@ -7,10 +7,9 @@
  * 
  */
 import getApiData from "./getApiData.js"
-import './env.js'
 import updateOne from "./util/updateOne_mysql.js"
+import { coordinates } from "./coordinates.js"
 
-const 방학동 = {nx:61, ny:129}
 const categoryKey = {T1H:'tempc',RN1:'rainmm',UUU:'windh',VVV:'windv',REH:'humidity',PTY:'raintype',VEC:'winddeg',WSD:'windspeed'}
 
 /**
@@ -31,8 +30,13 @@ function getCurrentData(data){
  * get...Data 에서 가공된 object 를 db 에 저장
  * @returns 
  */
-async function main(){
-    const data = getCurrentData(await getApiData(방학동,'current'))
-    return await updateOne(data,'current','방학3동')
+async function main(lo='방학3동'){
+    if(!lo in coordinates){
+        console.log('Wrong City Name')
+        return
+    }
+    const data = getCurrentData(await getApiData(coordinates[lo],'current'))
+    //console.log(data.items)
+    return await updateOne(data,'current',lo)
 }
-await main();
+await main('방학3동');
