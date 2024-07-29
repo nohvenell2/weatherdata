@@ -1,7 +1,7 @@
 import '../env.js'
 import {createConnection} from 'mysql2/promise'
 const connectionInfo = {
-    host: '43.202.38.30',
+    host: 'localhost',
     user: process.env.MYSQL_ID,
     password: process.env.MYSQL_PW,
     database: 'weather',
