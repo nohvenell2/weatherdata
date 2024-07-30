@@ -1,11 +1,12 @@
 //mid data 를 일별로 저장
 //db 방학3동 mid table 만들기
 //primary key 를 시간, 나머지 데이터를 시간에 종속되서 저장
-import { coordinates } from "./coordinates.js";
+import { coordinates } from "./constants/coordinates.js";
 import getApiData from "./getApiData.js";
 import connectDB from "./util/connectDB_mysql.js";
 import loggingmain from "./util/loggingmain.js";
 import convertToDateTime from "./util/convertToDateTime.js";
+import { dongs } from "./constants/locationInfo.js";
 
 const categoryKey = {POP:'rainper',SNO:'snowmm',TMP:'tempc',PCP:'rainmm',SKY:'sky',UUU:'windh',VVV:'windv',REH:'humidity',
     PTY:'raintype',VEC:'winddeg',WSD:'windspeed',TMN:'tempmin',TMX:'tempmax',WAV:'wave'}
@@ -27,17 +28,17 @@ function getMidData(data){
     });
     return result
 }
-async function main(lo='방학3동'){
+async function main(dong){
     let connection;
     try{
         connection = await connectDB();
-        const fetchdata = await getApiData(coordinates[lo],'mid')
+        const fetchdata = await getApiData(coordinates[dong],'mid')
         if (!fetchdata){return}
         const result = getMidData(fetchdata)
         const datas = result.items;
         for(const data of datas){
             const query = `
-            INSERT INTO weather.${lo}_mid (forecastTime, sky, tempc, rainmm, snowmm, rainper, humidity, raintype) 
+            INSERT INTO weather.${dong}_mid (forecastTime, sky, tempc, rainmm, snowmm, rainper, humidity, raintype) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
                 sky = VALUES(sky),
@@ -69,4 +70,7 @@ async function main(lo='방학3동'){
         connection && connection.end()
     }
 }
-loggingmain('getMid.js',main,'방학3동');
+const arg = process.argv.slice(2)[0]
+if(!dongs.includes(arg)){throw new Error(`${arg} - 잘못된 argument 입니다`);}
+loggingmain('getMid.js',main,arg);
+

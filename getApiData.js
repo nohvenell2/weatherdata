@@ -41,6 +41,7 @@ export default async function getApiData({nx,ny},type){
         }
         throw new Error(`API Response Error : ${resMsg}`)
     }catch(err){
-        console.log(`${new Date()} - [${type}] API fetch Error / ${err}`)
+        //console.log(`${new Date()} - [${type}] API fetch Error / ${err}`)
+        console.log(err)
     }
 }

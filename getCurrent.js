@@ -1,12 +1,11 @@
 //current data 를 동이름_short 에 시간별로 저장
 //primary key 를 시간, 나머지 데이터를 시간에 종속되서 저장
-import { coordinates } from "./coordinates.js";
+import { coordinates } from "./constants/coordinates.js";
+import { dongs } from "./constants/locationInfo.js";
 import getApiData from "./getApiData.js";
 import connectDB from "./util/connectDB_mysql.js";
 import loggingmain from "./util/loggingmain.js";
-
 const categoryKey = {T1H:'tempc',RN1:'rainmm',UUU:'windh',VVV:'windv',REH:'humidity',PTY:'raintype',VEC:'winddeg',WSD:'windspeed'}
-
 function getCurrentData(data){
     if (!data){return false}
     const result = {baseTime:data[0].baseTime,items:{}}
@@ -16,16 +15,16 @@ function getCurrentData(data){
     });
     return result
 }
-async function main(lo='방학3동'){
+async function main(dong='방학3동'){
     let connection;
     try{
         connection = await connectDB();
-        const fetchdata = await getApiData(coordinates[lo],'current')
+        const fetchdata = await getApiData(coordinates[dong],'current')
         if (!fetchdata){return}
         const result = getCurrentData(fetchdata)
         const data = result.items;
         const query = `
-            INSERT INTO weather.${lo}_current (id, tempc, rainmm, humidity, raintype) 
+            INSERT INTO weather.${dong}_current (id, tempc, rainmm, humidity, raintype) 
             VALUES (?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
                 tempc = VALUES(tempc),
@@ -47,4 +46,6 @@ async function main(lo='방학3동'){
         connection && connection.end()
     }
 }
-loggingmain('getCurrent.js',main,'방학3동');
+const arg = process.argv.slice(2)[0]
+if(!dongs.includes(arg)){throw new Error(`${arg} - 잘못된 argument 입니다`);}
+loggingmain('getCurrent.js',main,arg);
