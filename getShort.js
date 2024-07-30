@@ -1,23 +1,14 @@
-/**
- * 1. 정보를 api 로부터 JSON 형식으로 요청
- * 2. 요청 받은 데이터를 간단한 object 로 변환
- * 3. object 를 db 에 전달
- * !! 초단기에보 정보는 매 시 30분에 발표하고 40분에 api 에 업로드
- * !! 매 시 40분에 실행
- * 
- */
-import getApiData from "./getApiData.js"
-import updateOne from './util/updateOne_mysql.js'
-import { coordinates } from "./coordinates.js"
-import loggingmain from "./util/loggingmain.js"
+//short data 를 동이름_short 에 시간별로 저장
+//primary key 를 시간, 나머지 데이터를 시간에 종속되서 저장
+import { coordinates } from "./coordinates.js";
+import getApiData from "./getApiData.js";
+import connectDB from "./util/connectDB_mysql.js";
+import loggingmain from "./util/loggingmain.js";
+import convertToDateTime from "./util/convertToDateTime.js";
 
 const categoryKey = {T1H:'tempc',RN1:'rainmm',SKY:'sky',UUU:'windh',VVV:'windv',REH:'humidity',
     PTY:'raintype',LGT:'thunder',VEC:'winddeg',WSD:'windspeed'}
-/**
- * reponse 에서 받은 raw 데이터를 보기 쉬운 객체로 가공
- * @param {object} data 
- * @returns object
- */
+
 function getShortData(data){
     if (!data){return false}
     const result = {baseTime:data[0].baseTime, items:[{},{},{},{},{},{}]}
@@ -30,17 +21,42 @@ function getShortData(data){
     });
     return result
 }
-/**
- * get...Data 에서 가공된 object 를 db 에 저장
- * @returns 
- */
+
 async function main(lo='방학3동'){
-    if(!lo in coordinates){
-        console.log('Wrong City Name')
-        return
+    let connection;
+    try{
+        connection = await connectDB();
+        const fetchdata = await getApiData(coordinates[lo],'short')
+        if (!fetchdata){return}
+        const result = getShortData(fetchdata)
+        const datas = result.items;
+        for(const data of datas){
+            const query = `
+            INSERT INTO weather.${lo}_short (forecastTime, sky, tempc, rainmm, humidity, raintype) 
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                sky = VALUES(sky),
+                tempc = VALUES(tempc),
+                rainmm = VALUES(rainmm),
+                humidity = VALUES(humidity),
+                raintype = VALUES(raintype)`;
+            const {forecastDate,forecastTime} = data;
+            const datetime = convertToDateTime(forecastDate,forecastTime)
+            const ifNone = (a) => {return a === ''? null : a}
+            const values = [
+                datetime,
+                ifNone(data.sky),
+                ifNone(data.tempc),
+                ifNone(data.rainmm),
+                ifNone(data.humidity),
+                ifNone(data.raintype),
+            ]
+            const [results] = await connection.query(query, values);
+        }
+    }catch(err){
+        console.log(`Uploading Short Error : ${err}`)
+    }finally{
+        connection && connection.end()
     }
-    const data = getShortData(await getApiData(coordinates[lo],'short'))
-    //console.log(data.items)
-    return await updateOne(data,'short',lo);
 }
 loggingmain('getShort.js',main,'방학3동');

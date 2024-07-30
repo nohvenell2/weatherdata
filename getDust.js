@@ -21,8 +21,10 @@ const searchCondition = 'HOUR'
 const url =`${apiurl}?serviceKey=${serviceKey}&numOfRows=${numOfRows}&pageNo=${pageNo}&returnType=${returnType}&sidoName=${sidoName}&searchCondition=${searchCondition}`
 //api 에서 데이터 가져오기
 async function getApiData(url){
+    let fetchdata;
     try{
-        const result = await (await fetch(url)).json()
+        fetchdata = await fetch(url)
+        const result = await fetchdata.json()
         const resCode = result.response.header.resultCode
         const resMsg = result.response.header.resultMsg
         const res = resCode == '00'? result.response.body.items : false
@@ -32,7 +34,7 @@ async function getApiData(url){
         }
         throw new Error(`API Response Error : ${resMsg}`)
     }catch(err){
-        console.log(`Air Condition Api Fetch Error : ${err}`)
+        console.log(`Air Condition API fetch Error. fetchdata = ${fetchdata} error = ${err}`)
     }
 }
 //mysql 에 데이터 저장하기

@@ -18,8 +18,20 @@ const urls = {current:apiCurrentUrl,short:apiShortUrl,mid:apiMidUrl}
 export default async function getApiData({nx,ny},type){
     const {base_date,base_time}=baseTimeFunc[type]();
     const url = `${urls[type]}?serviceKey=${process.env.APIKEY}&numOfRows=${numOfRows}&pageNo=${pageNo}&dataType=${dataType}&base_date=${base_date}&base_time=${base_time}&nx=${nx}&ny=${ny}`
+    let contentType;
     try{
-        const result = await (await fetch(url)).json()
+        const fetchdata = await fetch(url,{headers:{'Accept':'application/json'}})
+        contentType = fetchdata.headers.get('content-type');
+        const jsonString = await fetchdata.text()
+        let result;
+        try{
+            result = JSON.parse(jsonString)
+        }catch(error){
+            console.log(`${new Date()} - [${type}] API Json Error.`)
+            console.log(`Type = ${contentType}`)
+            console.log(`Text = `)
+            console.log(jsonString)
+        }
         const resCode = result.response.header.resultCode
         const resMsg = result.response.header.resultMsg
         const res = resCode == '00'? result.response.body.items.item : false
@@ -29,6 +41,6 @@ export default async function getApiData({nx,ny},type){
         }
         throw new Error(`API Response Error : ${resMsg}`)
     }catch(err){
-        console.log(`API fetch Error : ${err}`)
+        console.log(`${new Date()} - [${type}] API fetch Error / ${err}`)
     }
 }

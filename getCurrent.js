@@ -1,23 +1,12 @@
-/**
- * 1. 정보를 api 로부터 JSON 형식으로 요청
- * 2. 요청 받은 데이터를 간단한 object 로 변환
- * 3. object 를 db 에 전달
- * !! 초단기실황 정보는 매 시 30분에 발표하고 40분에 api 에 업로드
- * !! 매 시 40분에 실행
- * 
- */
-import getApiData from "./getApiData.js"
-import updateOne from "./util/updateOne_mysql.js"
-import { coordinates } from "./coordinates.js"
-import loggingmain from "./util/loggingmain.js"
+//current data 를 동이름_short 에 시간별로 저장
+//primary key 를 시간, 나머지 데이터를 시간에 종속되서 저장
+import { coordinates } from "./coordinates.js";
+import getApiData from "./getApiData.js";
+import connectDB from "./util/connectDB_mysql.js";
+import loggingmain from "./util/loggingmain.js";
 
 const categoryKey = {T1H:'tempc',RN1:'rainmm',UUU:'windh',VVV:'windv',REH:'humidity',PTY:'raintype',VEC:'winddeg',WSD:'windspeed'}
 
-/**
- * api 의 raw object 를 간단한 형식으로 가공
- * @param {object} data 
- * @returns object
- */
 function getCurrentData(data){
     if (!data){return false}
     const result = {baseTime:data[0].baseTime,items:{}}
@@ -27,17 +16,35 @@ function getCurrentData(data){
     });
     return result
 }
-/**
- * get...Data 에서 가공된 object 를 db 에 저장
- * @returns 
- */
 async function main(lo='방학3동'){
-    if(!lo in coordinates){
-        console.log('Wrong City Name')
-        return
+    let connection;
+    try{
+        connection = await connectDB();
+        const fetchdata = await getApiData(coordinates[lo],'current')
+        if (!fetchdata){return}
+        const result = getCurrentData(fetchdata)
+        const data = result.items;
+        const query = `
+            INSERT INTO weather.${lo}_current (id, tempc, rainmm, humidity, raintype) 
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                tempc = VALUES(tempc),
+                rainmm = VALUES(rainmm),
+                humidity = VALUES(humidity),
+                raintype = VALUES(raintype)`;
+        const ifNone = (a) => {return a === ''? null : a}
+        const values = [
+            1,
+            ifNone(data.tempc),
+            ifNone(data.rainmm),
+            ifNone(data.humidity),
+            ifNone(data.raintype),
+        ]
+        const [results] = await connection.query(query, values);
+    }catch(err){
+        console.log(`Uploading Current Error : ${err}`)
+    }finally{
+        connection && connection.end()
     }
-    const data = getCurrentData(await getApiData(coordinates[lo],'current'))
-    const result = await updateOne(data,'current',lo)
-    return `${(new Date).toLocaleString()} - [getCurrent.js] Done.`
 }
 loggingmain('getCurrent.js',main,'방학3동');

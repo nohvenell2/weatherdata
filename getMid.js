@@ -1,24 +1,14 @@
-/**
- * 1. 정보를 api 로부터 JSON 형식으로 요청
- * 2. 요청 받은 데이터를 간단한 object 로 변환
- * 3. object 를 db 에 전달
- * !! 단기예보 정보는 2 5 8 11 14 17 20 23 시에 발표하고 발표 10분 후 api 에 업로드
- * !! 매 시 10분에 실행
- */
-
-import getApiData from "./getApiData.js"
-import updateOne from './util/updateOne_mysql.js'
-import { coordinates } from "./coordinates.js"
-import loggingmain from "./util/loggingmain.js"
+//mid data 를 일별로 저장
+//db 방학3동 mid table 만들기
+//primary key 를 시간, 나머지 데이터를 시간에 종속되서 저장
+import { coordinates } from "./coordinates.js";
+import getApiData from "./getApiData.js";
+import connectDB from "./util/connectDB_mysql.js";
+import loggingmain from "./util/loggingmain.js";
+import convertToDateTime from "./util/convertToDateTime.js";
 
 const categoryKey = {POP:'rainper',SNO:'snowmm',TMP:'tempc',PCP:'rainmm',SKY:'sky',UUU:'windh',VVV:'windv',REH:'humidity',
     PTY:'raintype',VEC:'winddeg',WSD:'windspeed',TMN:'tempmin',TMX:'tempmax',WAV:'wave'}
-
-/**
- * api 의 raw object 를 간단한 형식으로 가공
- * @param {object} data 
- * @returns object
- */
 function getMidData(data){
     if (!data){return false}
     const result = {baseTime:data[0].baseTime, items:[{}]}
@@ -37,18 +27,46 @@ function getMidData(data){
     });
     return result
 }
-/**
- * get...Data 에서 가공된 object 를 db 에 저장
- * @returns 
- */
 async function main(lo='방학3동'){
-    if(!lo in coordinates){
-        console.log('Wrong City Name')
-        return
+    let connection;
+    try{
+        connection = await connectDB();
+        const fetchdata = await getApiData(coordinates[lo],'mid')
+        if (!fetchdata){return}
+        const result = getMidData(fetchdata)
+        const datas = result.items;
+        for(const data of datas){
+            const query = `
+            INSERT INTO weather.${lo}_mid (forecastTime, sky, tempc, rainmm, snowmm, rainper, humidity, raintype) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                sky = VALUES(sky),
+                tempc = VALUES(tempc),
+                rainmm = VALUES(rainmm),
+                snowmm = VALUES(snowmm),
+                rainper = VALUES(rainper),
+                humidity = VALUES(humidity),
+                raintype = VALUES(raintype)`;
+            const {forecastDate,forecastTime} = data;
+            const datetime = convertToDateTime(forecastDate,forecastTime)
+            const ifNone = (a) => {return a === ''? null : a}
+            //todo sky raintype 변환 고려
+            const values = [
+                datetime,
+                ifNone(data.sky),
+                ifNone(data.tempc),
+                ifNone(data.rainmm),
+                ifNone(data.snowmm),
+                ifNone(data.rainper),
+                ifNone(data.humidity),
+                ifNone(data.raintype),
+            ]
+            const [results] = await connection.query(query, values);
+        }
+    }catch(err){
+        console.log(`Uploading Mid Error : ${err}`)
+    }finally{
+        connection && connection.end()
     }
-    const data = getMidData(await getApiData(coordinates[lo],'mid'))
-    //console.log(data.items)
-    const result = await updateOne(data,'mid',lo)
-    return `${(new Date).toLocaleString()} - [getMid.js] Done.`
 }
 loggingmain('getMid.js',main,'방학3동');
