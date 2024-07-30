@@ -26,8 +26,8 @@ export default async function getApiData({nx,ny},type){
         let result;
         try{
             result = JSON.parse(jsonString)
-        }catch(error){
-            console.log(`${new Date()} - [${type}] API Json Error.`)
+        }catch(err){
+            console.log(`${new Date()} - [${type}] API Json Error. ${err}`)
             console.log(`Type = ${contentType}`)
             console.log(`Text = `)
             console.log(jsonString)
