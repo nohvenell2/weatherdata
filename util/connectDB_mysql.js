@@ -11,6 +11,6 @@ export default async function connectDB(info=connectionInfo){
     try{
         return await createConnection(info);
     }catch(err){
-        console.log(`Mysql Connection Error : ${err}`)
+        throw new Error(`Mysql Connection Error - ` + err.message)
     }
 }

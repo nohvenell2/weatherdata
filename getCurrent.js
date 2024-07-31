@@ -41,7 +41,7 @@ async function main(dong='방학3동'){
         ]
         const [results] = await connection.query(query, values);
     }catch(err){
-        console.log(`Uploading Current Error : ${err}`)
+        throw new Error(`Uploading ${dong} Current Error - ` + err.message)
     }finally{
         connection && connection.end()
     }

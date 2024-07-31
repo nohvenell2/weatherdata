@@ -49,18 +49,22 @@ function baseTimeShort(now = Temporal.Now.plainDateTimeISO(), delay = 10){
  * @returns 
  */
 function baseTimeMid(now = Temporal.Now.plainDateTimeISO(), delay = 10){
-    //10분 딜레이기 때문에 현재 분에서 -10분 으로 시간 조정
-    var now = now.subtract({minutes:10})
-    //2시 전 => 전날 23시
-    if (now.hour == 0 || now.hour == 1){
-        now = now.with({day: now.day-1, hour:23})
+    try{
+        //10분 딜레이기 때문에 현재 분에서 -10분 으로 시간 조정
+        var now = now.subtract({minutes:10})
+        //2시 전 => 전날 23시
+        if (now.hour == 0 || now.hour == 1){
+            now = now.subtract({days:1}).with({hour:23})
+        }
+        //가장 가까운 기준시간
+        else{
+            now = now.with({hour: Math.floor((now.hour-2)/3)*3 + 2})
+        }
+        var {year,month,day,hour} = temporalTimeInfo(now)
+        return {base_time:hour+'00',base_date:year+month+day}
+    }catch(err){
+        throw new Error('baseTimeMid Error - '+err.message)
     }
-    //가장 가까운 기준시간
-    else{
-        now = now.with({hour: Math.floor((now.hour-2)/3)*3 + 2})
-    }
-    var {year,month,day,hour} = temporalTimeInfo(now)
-    return {base_time:hour+'00',base_date:year+month+day}
 }
-
+//테스트 예제 console.log(baseTimeMid(Temporal.PlainDateTime.from('2024-08-01T02:09:00')))
 export {baseTimeCurrent, baseTimeMid, baseTimeShort}

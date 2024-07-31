@@ -34,7 +34,7 @@ async function getApiData(url){
         }
         throw new Error(`API Response Error : ${resMsg}`)
     }catch(err){
-        console.log(`Air Condition API fetch Error. fetchdata = ${fetchdata} error = ${err}`)
+        throw new Error(`AirCondition API Fetch Error - ` + err.message)
     }
 }
 //mysql 에 데이터 저장하기
@@ -74,16 +74,20 @@ async function updateAirCondition(data){
         const [results] = await connection.query(query, values);
         }
         //console.log('Upload air condition data');
-    } catch (err) {
-        console.error('데이터 삽입 오류:', err.stack);
+    }catch(err){
+        throw new Error('AirCondition Data Uploading Error' + err.message);
     } finally {
         await connection.end();
     }
 };
 //실행 함수
 async function main(){
-    const result = await updateAirCondition(await getApiData(url))
-    return `${(new Date).toLocaleString()} [getDust.js] Done.`
+    try{
+        const fetchdata = await getApiData(url)
+        const result = await updateAirCondition(fetchdata)
+    }catch(err){
+        throw new Error(err)
+    }
 }
 //실행
 loggingmain('getDust.js',main)

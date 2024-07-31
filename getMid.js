@@ -65,7 +65,7 @@ async function main(dong){
             const [results] = await connection.query(query, values);
         }
     }catch(err){
-        console.log(`Uploading Mid Error : ${err}`)
+        throw new Error(`Uploading ${dong} Mid Error - ` + err.message)
     }finally{
         connection && connection.end()
     }

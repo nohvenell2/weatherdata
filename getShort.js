@@ -55,7 +55,7 @@ async function main(dong){
             const [results] = await connection.query(query, values);
         }
     }catch(err){
-        console.log(`Uploading Short Error : ${err}`)
+        throw new Error(`Uploading ${dong} Short Error - ` + err.message)
     }finally{
         connection && connection.end()
     }

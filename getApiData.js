@@ -1,7 +1,6 @@
 import { baseTimeCurrent,baseTimeMid,baseTimeShort } from "./baseDateTime.js"
 import './env.js'
-
-const apiCurrentUrl = 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst'
+const apiCurrentUrl = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtNcst'
 const apiShortUrl = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getUltraSrtFcst'
 const apiMidUrl = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'
 const numOfRows = '2000'
@@ -18,19 +17,18 @@ const urls = {current:apiCurrentUrl,short:apiShortUrl,mid:apiMidUrl}
 export default async function getApiData({nx,ny},type){
     const {base_date,base_time}=baseTimeFunc[type]();
     const url = `${urls[type]}?serviceKey=${process.env.APIKEY}&numOfRows=${numOfRows}&pageNo=${pageNo}&dataType=${dataType}&base_date=${base_date}&base_time=${base_time}&nx=${nx}&ny=${ny}`
-    let contentType;
     try{
         const fetchdata = await fetch(url,{headers:{'Accept':'application/json'}})
-        contentType = fetchdata.headers.get('content-type');
         const jsonString = await fetchdata.text()
         let result;
         try{
             result = JSON.parse(jsonString)
         }catch(err){
-            console.log(`${new Date()} - [${type}] API Json Error. ${err}`)
-            console.log(`Type = ${contentType}`)
-            console.log(`Text = `)
-            console.log(jsonString)
+            throw new Error(
+                `Not JSON Error.
+                Text =
+                ${jsonString}
+                ` + err.message);
         }
         const resCode = result.response.header.resultCode
         const resMsg = result.response.header.resultMsg
@@ -41,7 +39,7 @@ export default async function getApiData({nx,ny},type){
         }
         throw new Error(`API Response Error : ${resMsg}`)
     }catch(err){
-        //console.log(`${new Date()} - [${type}] API fetch Error / ${err}`)
-        console.log(err)
+        throw new Error(`[${new Date()}] 기상청 ${type} API Fetch Error : ` + err.message)
     }
 }
+//console.log(await getApiData({nx:61,ny:129},'mid'))
