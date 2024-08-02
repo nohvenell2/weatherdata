@@ -66,5 +66,5 @@ function baseTimeMid(now = Temporal.Now.plainDateTimeISO(), delay = 10){
         throw new Error('baseTimeMid Error - '+err.message)
     }
 }
-//테스트 예제 console.log(baseTimeMid(Temporal.PlainDateTime.from('2024-08-01T02:09:00')))
+//console.log(baseTimeMid(Temporal.PlainDateTime.from('2024-08-01T02:09:00')))
 export {baseTimeCurrent, baseTimeMid, baseTimeShort}

@@ -2,3 +2,4 @@
 # testing
 coverage/
 log/
+/node_modules
