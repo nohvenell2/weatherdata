@@ -29,7 +29,7 @@ async function main(dong){
         //fetch
         let fetchdata;
         try{
-            fetchdata = await getApiData(coordinates[dong],'mid')
+            fetchdata = await getApiData(coordinates[dong],'short')
             if (!fetchdata){
                 console.log('No Data from getApiData.js')
                 return
