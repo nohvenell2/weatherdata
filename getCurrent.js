@@ -1,4 +1,4 @@
-//current data 를 동이름_short 에 시간별로 저장
+//current data 를 동이름_current 에 시간별로 저장
 //primary key 를 시간, 나머지 데이터를 시간에 종속되서 저장
 import { coordinates } from "./constants/coordinates.js";
 import { dongs } from "./constants/locationInfo.js";
