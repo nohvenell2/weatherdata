@@ -29,46 +29,56 @@ function getMidData(data){
     return result
 }
 async function main(dong){
-    let connection;
+    const connection = await connectDB();
     try{
-        connection = await connectDB();
-        const fetchdata = await getApiData(coordinates[dong],'mid')
-        if (!fetchdata){return}
-        const result = getMidData(fetchdata)
-        const datas = result.items;
-        for(const data of datas){
-            const query = `
-            INSERT INTO weather.${dong}_mid (forecastTime, sky, tempc, rainmm, snowmm, rainper, humidity, raintype) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE
-                sky = VALUES(sky),
-                tempc = VALUES(tempc),
-                rainmm = VALUES(rainmm),
-                snowmm = VALUES(snowmm),
-                rainper = VALUES(rainper),
-                humidity = VALUES(humidity),
-                raintype = VALUES(raintype)`;
-            const {forecastDate,forecastTime} = data;
-            const datetime = convertToDateTime(forecastDate,forecastTime)
-            const ifNone = (a) => {return a === ''? null : a}
-            //todo sky raintype 변환 고려
-            const values = [
-                datetime,
-                ifNone(data.sky),
-                ifNone(data.tempc),
-                ifNone(data.rainmm),
-                ifNone(data.snowmm),
-                ifNone(data.rainper),
-                ifNone(data.humidity),
-                ifNone(data.raintype),
-            ]
-            const [results] = await connection.query(query, values);
+        //fetch
+        let fetchdata;
+        try{
+            fetchdata = await getApiData(coordinates[dong],'mid')
+            if (!fetchdata){
+                console.log('No Data from getApiData.js')
+                return
+            }
+        }catch(err){
+            throw new Error(err)
         }
-    }catch(err){
-        throw new Error(`Uploading ${dong} Mid Error\n` + err.message)
-    }finally{
-        connection && connection.end()
-    }
+        //fetch data to usable data
+        const result = getMidData(fetchdata)
+        //upload Data
+        try{
+            const datas = result.items;
+            for(const data of datas){
+                const query = `
+                INSERT INTO weather.${dong}_mid (forecastTime, sky, tempc, rainmm, snowmm, rainper, humidity, raintype) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    sky = VALUES(sky),
+                    tempc = VALUES(tempc),
+                    rainmm = VALUES(rainmm),
+                    snowmm = VALUES(snowmm),
+                    rainper = VALUES(rainper),
+                    humidity = VALUES(humidity),
+                    raintype = VALUES(raintype)`;
+                const {forecastDate,forecastTime} = data;
+                const datetime = convertToDateTime(forecastDate,forecastTime)
+                const ifNone = (a) => {return a === ''? null : a}
+                //todo sky raintype 변환 고려
+                const values = [
+                    datetime,
+                    ifNone(data.sky),
+                    ifNone(data.tempc),
+                    ifNone(data.rainmm),
+                    ifNone(data.snowmm),
+                    ifNone(data.rainper),
+                    ifNone(data.humidity),
+                    ifNone(data.raintype),
+                ]
+                const [results] = await connection.query(query, values);
+            }
+        }catch(err){
+            throw new Error(`Uploading ${dong} Mid Error\n` + err.message)
+        }
+    }finally{ connection && connection.end() }
 }
 const arg = process.argv.slice(2)[0]
 if(!dongs.includes(arg)){throw new Error(`${arg} - 잘못된 argument 입니다`);}
