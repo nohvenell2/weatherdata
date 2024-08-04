@@ -26,7 +26,7 @@ export default async function getApiData({nx,ny},type){
         reqType = fetchdata.headers.get('Content-Type')
         fetchString = await fetchdata.text()
     }catch(err){
-        throw new Error(`${type} API Fetch Error\n` + err.message)
+        throw new Error(err.message + `[${new Date()}]${type} API Fetch Error\n`)
     }
     //fetch to JSON. XML 로 응답 오면 분석해서 throw error
     try{
